@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #1e1e1e;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .invoice-card {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .invoice-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #2d2d2d;
+            margin-bottom: 20px;
+        }
+
+        .table-info {
+            background-color: #2d2d2d;
+            color: #ffd700;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .timestamp {
+            color: #808080;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .invoice-items {
+            margin: 20px 0;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .total {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-top: 2px solid #2d2d2d;
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .payment-container {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .payment-btn {
+            background-color: #1a73e8;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-btn:hover {
+            background-color: #1557b0;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .primary-btn {
+            background-color: #ff4d4d;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #ff3333;
+        }
+
+        .secondary-btn {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        .secondary-btn:hover {
+            background-color: #3d3d3d;
+        }
+
+        .payment-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .payment-method {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .payment-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .payment-method-label {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .payment-method-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .payment-total {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .total-amount {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .place-order-btn {
+            background-color: #ff4d4d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .place-order-btn:hover {
+            background-color: #ff3333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="font-size: 1.5em;">Invoice</h1>
+    </div>
+
+    <div class="container">
+        <div class="invoice-card">
+            <div class="invoice-header">
+                <h2>Thank You for Your Order!</h2>
+                <div class="timestamp" id="timestamp"></div>
+            </div>
+
+            <div class="table-info">
+                <i class="fas fa-utensils"></i> Table No. #{{ table }}
+            </div>
+
+            <div class="invoice-items" id="invoiceItems">
+                <!-- Items will be inserted here -->
+            </div>
+
+            <div class="total">
+                <span>Total Amount</span>
+                <span>₹<span id="totalAmount">0</span></span>
+            </div>
+
+            <div class="payment-method">
+                <div class="payment-info">
+                    <span class="payment-method-label">Pay using</span>
+                    <span class="payment-method-name"> UPI</span>
+                </div>
+                <div class="payment-total">
+                    <span class="total-amount">₹<span id="payAmount">{{ order.total }}</span></span>
+                    <button class="btn place-order-btn" onclick="initiatePayment()">
+                        Place Order
+                    </button>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button class="btn secondary-btn" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button class="btn primary-btn" onclick="goToMenu()">
+                    <i class="fas fa-utensils"></i> Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const orderId = window.location.pathname.split('/').pop();
+        const tableNo = "{{ table }}";
+
+        function loadInvoice() {
+            fetch(`/get-order-status/${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status !== "error") {
+                        displayInvoice(data);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayInvoice(order) {
+            document.getElementById('totalAmount').textContent = order.total;
+            document.getElementById('payAmount').textContent = order.total;
+            document.getElementById('timestamp').textContent = new Date().toLocaleString();
+
+            const itemsContainer = document.getElementById('invoiceItems');
+            itemsContainer.innerHTML = order.items.map(item => `
+                <div class="item">
+                    <span>${item.quantity}x ${item.name}</span>
+                    <span>₹${item.price * item.quantity}</span>
+                </div>
+            `).join('');
+        }
+
+        function goBack() {
+            window.location.href = `/order-status/${orderId}`;
+        }
+
+        function goToMenu() {
+            window.location.href = `/?table=${tableNo}`;
+        }
+
+        function verifyPayment(status) {
+            const statusDiv = document.getElementById('payment-status');
+            statusDiv.style.display = 'block';
+            
+            fetch(`/verify-payment/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `status=${status}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                statusDiv.className = `payment-status ${data.status}`;
+                statusDiv.textContent = data.message;
+                
+                if (data.status === 'success') {
+                    setTimeout(() => {
+                        window.location.href = `/order-status/${orderId}`;
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusDiv.className = 'payment-status error';
+                statusDiv.textContent = 'An error occurred. Please try again.';
+            });
+        }
+
+        function initiatePayment() {
+            const amount = document.getElementById('payAmount').textContent;
+            
+            const upiDetails = {
+                paytm: "mohammedzaid83505-1@okaxis"
+            };
+
+            const paymentLink = `upi://pay?pa=${upiDetails.paytm}&pn=ChaiPatti&am=${amount}&tn=Order%20${orderId}&cu=INR`;
+
+            window.location.href = paymentLink;
+        }
+
+        // Load invoice when page loads
+        loadInvoice();
+    </script>
+</body>
+</html>

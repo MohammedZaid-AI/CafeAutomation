@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiter View - Order Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .orders-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .order-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .order-items {
+            margin: 10px 0;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #fed7d7;
+            color: #c53030;
+        }
+        .status-completed {
+            background-color: #c6f6d5;
+            color: #2f855a;
+        }
+        .status-served {
+            background-color: #bee3f8;
+            color: #2c5282;
+        }
+        .serve-btn {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .serve-btn:hover {
+            background-color: #3182ce;
+        }
+        .refresh-btn {
+            background-color: #48bb78;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .table-info {
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order Status</h1>
+    <button class="refresh-btn" onclick="fetchOrders()">Refresh Orders</button>
+    <div id="orders-container" class="orders-container">
+        <!-- Orders will be dynamically inserted here -->
+    </div>
+
+    <script>
+        function fetchOrders() {
+            fetch('/waiter-orders')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayOrders(data.orders);
+                    } else {
+                        console.error('Error fetching orders:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById('orders-container');
+            container.innerHTML = '';
+
+            if (Object.keys(orders).length === 0) {
+                container.innerHTML = '<p>No orders at the moment</p>';
+                return;
+            }
+
+            for (const [orderId, order] of Object.entries(orders)) {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                
+                const statusClass = order.status === 'completed' ? 'status-completed' : 
+                                  order.status === 'served' ? 'status-served' : 
+                                  'status-pending';
+                
+                orderCard.innerHTML = `
+                    <div class="order-header">
+                        <h3 class="table-number">Table No: ${order.tableNo}</h3>
+                        <span class="status ${statusClass}">${order.status || 'pending'}</span>
+                    </div>
+                    <div class="table-info">Table: ${order.table || 'Not assigned'}</div>
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item">
+                                <span>${item.quantity}x ${item.name}</span>
+                                <span>₹${item.price * item.quantity}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="text-align: right; font-weight: bold;">
+                        Total: ₹${order.total}
+                    </div>
+                    ${order.status === 'completed' ? `
+                        <button class="serve-btn" onclick="markAsServed(${orderId})">
+                            Mark as Served
+                        </button>
+                    ` : ''}
+                `;
+                container.appendChild(orderCard);
+            }
+        }
+
+        function markAsServed(orderId) {
+            fetch(`/mark-served/${orderId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        fetchOrders();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Fetch orders immediately when page loads
+        fetchOrders();
+
+        // Refresh orders every 15 seconds
+        setInterval(fetchOrders, 15000);
+    </script>
+</body>
+</html>

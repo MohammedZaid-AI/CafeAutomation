@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .header {
+            background-color: #1e1e1e;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-button {
+            font-size: 24px;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .restaurant-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .delivery-time {
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+
+        .parking-slot-info {
+            background-color: #2d2d2d;
+            color: #ffd700;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: 500;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .menu-section {
+            margin-bottom: 30px;
+        }
+
+        .menu-item {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .item-details {
+            flex-grow: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .item-price {
+            color: #b3b3b3;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .bestseller-tag {
+            background-color: #2d2d2d;
+            color: #ffd700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .quantity-control {
+            background-color: #2d2d2d;
+            border: 1px solid #3d3d3d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .quantity-btn {
+            padding: 8px 15px;
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .quantity-btn:hover {
+            background-color: #2d2d2d;
+        }
+
+        .quantity {
+            padding: 0 15px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .cart-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e1e1e;
+            padding: 15px 20px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-total {
+            font-weight: 600;
+            font-size: 16px;
+            color: #ffffff;
+        }
+
+        .place-order-btn {
+            background-color: #ff4d4d;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .place-order-btn:hover {
+            background-color: #ff3333;
+        }
+
+        .veg-indicator {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #00b300;
+            border-radius: 2px;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .veg-indicator::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: #00b300;
+            border-radius: 50%;
+            display: block;
+            margin: 2px;
+        }
+
+        .item-description {
+            color: #808080;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .category-title {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2d2d2d;
+        }
+
+        /* Add smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Add loading animation */
+        @keyframes shimmer {
+            0% { background-position: -468px 0 }
+            100% { background-position: 468px 0 }
+        }
+
+        .loading {
+            animation: shimmer 1s linear infinite;
+            background: linear-gradient(to right, #1e1e1e 8%, #2d2d2d 18%, #1e1e1e 33%);
+            background-size: 800px 104px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="#" class="back-button">←</a>
+        <div>
+            <div class="restaurant-name">Restaurant Name</div>
+            <div class="delivery-time">Table No: {{ table }}</div>
+        </div>
+        <div style="width: 24px;"></div>
+    </div>
+
+    <div class="container">
+        <div class="table-info">
+            <i class="fas fa-utensils"></i> Table No. #{{ table }}
+        </div>
+
+        <div class="category-title">Popular Items</div>
+        <div class="menu-section">
+            {% for item in menu %}
+            <div class="menu-item">
+                <div class="item-details">
+                    <div class="veg-indicator"></div>
+                    <span class="item-name">{{ item.name }}</span>
+                    {% if loop.first %}
+                    <span class="bestseller-tag">★ Bestseller</span>
+                    {% endif %}
+                    <div class="item-description">Delicious {{ item.name }} prepared with finest ingredients</div>
+                    <div class="item-price">₹{{ item.price }}</div>
+                </div>
+                <div class="quantity-control">
+                    <button class="quantity-btn" onclick="decreaseQuantity({{ item.id }})">−</button>
+                    <span class="quantity" id="quantity-{{ item.id }}">0</span>
+                    <button class="quantity-btn" onclick="increaseQuantity({{ item.id }})">+</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="cart-footer">
+        <div class="cart-total">Total: ₹<span id="total-amount">0</span></div>
+        <button class="place-order-btn" onclick="placeOrder()">
+            <i class="fas fa-shopping-cart"></i> Place Order
+        </button>
+    </div>
+
+    <script>
+        const menuItems = {{ menu|tojson }};
+        let orderItems = {};
+        const tableNo = "{{ table }}";
+
+        function updateTotal() {
+            let total = 0;
+            for (const itemId in orderItems) {
+                const quantity = orderItems[itemId];
+                const item = menuItems.find(item => item.id === parseInt(itemId));
+                total += item.price * quantity;
+            }
+            document.getElementById('total-amount').textContent = total;
+        }
+
+        function increaseQuantity(itemId) {
+            orderItems[itemId] = (orderItems[itemId] || 0) + 1;
+            document.getElementById(`quantity-${itemId}`).textContent = orderItems[itemId];
+            updateTotal();
+        }
+
+        function decreaseQuantity(itemId) {
+            if (orderItems[itemId] && orderItems[itemId] > 0) {
+                orderItems[itemId]--;
+                document.getElementById(`quantity-${itemId}`).textContent = orderItems[itemId];
+                if (orderItems[itemId] === 0) {
+                    delete orderItems[itemId];
+                }
+                updateTotal();
+            }
+        }
+
+        function placeOrder() {
+            const items = Object.entries(orderItems).map(([itemId, quantity]) => {
+                const item = menuItems.find(item => item.id === parseInt(itemId));
+                return {
+                    id: parseInt(itemId),
+                    name: item.name,
+                    price: item.price,
+                    quantity: quantity
+                };
+            });
+
+            if (items.length === 0) {
+                alert('Please select at least one item');
+                return;
+            }
+
+            fetch('/billing', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    items: items,
+                    tableNo: tableNo
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location.href = `/order-status/${data.invoice_id}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error processing your order');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #1e1e1e;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .order-card {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .slot-info {
+            background-color: #2d2d2d;
+            color: #ffd700;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status-box {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .status-pending {
+            background-color: #2d2d2d;
+            color: #ffd700;
+        }
+
+        .status-completed {
+            background-color: #1b4332;
+            color: #4ade80;
+        }
+
+        .order-items {
+            margin: 20px 0;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .total {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-top: 2px solid #2d2d2d;
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .primary-btn {
+            background-color: #ff4d4d;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #ff3333;
+        }
+
+        .secondary-btn {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        .secondary-btn:hover {
+            background-color: #3d3d3d;
+        }
+
+        .loading-spinner {
+            border: 3px solid #2d2d2d;
+            border-top: 3px solid #ff4d4d;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="font-size: 1.5em;">Order Status</h1>
+    </div>
+
+    <div class="container">
+        <div class="order-card">
+            <div class="slot-info">
+                <i class="fas fa-utensils"></i> Table No. #{{ table }}
+            </div>
+
+            <div id="statusBox" class="status-box status-pending">
+                <i class="fas fa-spinner fa-spin"></i> Preparing your order...
+            </div>
+
+            <div class="order-items" id="orderItems">
+                <!-- Items will be inserted here -->
+            </div>
+
+            <div class="total">
+                <span>Total Amount</span>
+                <span>₹<span id="totalAmount">0</span></span>
+            </div>
+
+            <div class="button-container">
+                <button class="btn primary-btn" onclick="showInvoice()">
+                    <i class="fas fa-receipt"></i> View Bill
+                </button>
+                <button class="btn secondary-btn" onclick="goToMenu()">
+                    <i class="fas fa-utensils"></i> Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const orderId = window.location.pathname.split('/').pop();
+        const tableNo = "{{ table }}";
+
+        function checkOrderStatus() {
+            fetch(`/get-order-status/${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status !== "error") {
+                        updateOrderStatus(data);
+                        displayOrderItems(data);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateOrderStatus(order) {
+            const statusBox = document.getElementById('statusBox');
+            if (order.status === 'completed') {
+                statusBox.textContent = 'Order Ready!';
+                statusBox.className = 'status completed';
+            } else {
+                statusBox.textContent = 'Preparing your order...';
+                statusBox.className = 'status pending';
+            }
+        }
+
+        function displayOrderItems(order) {
+            const itemsContainer = document.getElementById('orderItems');
+            document.getElementById('totalAmount').textContent = order.total;
+
+            itemsContainer.innerHTML = order.items.map(item => `
+                <div class="item">
+                    <span>${item.quantity}x ${item.name}</span>
+                    <span>₹${item.price * item.quantity}</span>
+                </div>
+            `).join('');
+        }
+
+        function showInvoice() {
+            window.location.href = `/invoice/${orderId}`;
+        }
+
+        function goToMenu() {
+            window.location.href = `/?table=${tableNo}`;
+        }
+
+        // Check status immediately and every 10 seconds
+        checkOrderStatus();
+        setInterval(checkOrderStatus, 10000);
+    </script>
+</body>
+</html>

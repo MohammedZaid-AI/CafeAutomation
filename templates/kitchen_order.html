@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .order-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .status-pending {
+            color: #c53030;
+            font-weight: bold;
+        }
+        .status-completed {
+            color: #2f855a;
+            font-weight: bold;
+        }
+        .items-list {
+            margin: 10px 0;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .complete-btn {
+            background-color: #48bb78;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .complete-btn:hover {
+            background-color: #38a169;
+        }
+        .complete-btn:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .no-orders {
+            text-align: center;
+            padding: 20px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kitchen Orders</h1>
+    <div id="orders-container">
+        <!-- Orders will be displayed here -->
+    </div>
+
+    <script>
+        function loadOrders() {
+            fetch('/waiter-orders')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayOrders(data.orders);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById('orders-container');
+            container.innerHTML = '';
+
+            if (Object.keys(orders).length === 0) {
+                container.innerHTML = '<div class="no-orders">No pending orders</div>';
+                return;
+            }
+
+            for (const [orderId, order] of Object.entries(orders)) {
+                if (order.status === 'completed') continue;
+
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                orderCard.innerHTML = `
+                    <div class="order-header">
+                        <h3>Order #${orderId}</h3>
+                        <span class="status-${order.status}">${order.status.toUpperCase()}</span>
+                    </div>
+                    <div><strong>Table No:</strong> ${order.tableNo || 'Unknown'}</div>
+                    <div class="items-list">
+                        ${order.items.map(item => `
+                            <div class="item">
+                                <span>${item.quantity}x ${item.name}</span>
+                                <span>₹${item.price * item.quantity}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="total">Total: ₹${order.total}</div>
+                    <button class="complete-btn" onclick="completeOrder(${orderId})">
+                        Mark as Completed
+                    </button>
+                `;
+                container.appendChild(orderCard);
+            }
+        }
+
+        function completeOrder(orderId) {
+            fetch(`/complete-order/${orderId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    loadOrders();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Load orders initially and refresh every 10 seconds
+        loadOrders();
+        setInterval(loadOrders, 10000);
+    </script>
+</body>
+</html> 
